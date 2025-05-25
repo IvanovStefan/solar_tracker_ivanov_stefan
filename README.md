@@ -1,1 +1,1 @@
-# solar_tracker_ivanov_stefan
+# Solar Tracker
