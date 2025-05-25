@@ -15,6 +15,20 @@ const int pinDL = A3;
 const int pinTR = A4;
 const int pinDR = A5;
 
+// Valori pentru ACS712
+const int acsPin = A0;
+int sensitivity = 100;       // 100 mV/A pentru modulul de 20A
+int offsetvoltage = 2500;    // offset în mV
+int adcvalue = 0;
+double voltage = 0;
+double current = 0;
+
+// Timere
+unsigned long lastSensorRead = 0;
+unsigned long lastLDRRead = 0;
+const unsigned long sensorInterval = 500;  // 500ms
+const unsigned long ldrInterval = 100;     // 100ms
+
 // Media a 10 citiri consecutive ADC
 int smoothAnalogRead(int pin) {
   long sum = 0;
@@ -29,8 +43,7 @@ void setup() {
   lcd.begin();
   lcd.backlight();
   lcd.setCursor(0, 0);
-  lcd.print("Hello, World!");
-
+  lcd.print("POWER ON");
   
   base.attach(2);  // Digital PIN 2 pentru servo orizontal
   top.attach(3);   // Digital PIN 3 pentru servo vertical
@@ -38,35 +51,65 @@ void setup() {
 
   base.write(90);  // Default
   top.write(45);  // Default
+  delay(1500);
+  lcd.clear();
 }
 
 void loop() {
-  // Citirile senzorilor
-  int tl = smoothAnalogRead(pinTL);
-  int dl = 60 + smoothAnalogRead(pinDL);
-  int tr = smoothAnalogRead(pinTR);
-  int dr = 20 + smoothAnalogRead(pinDR);
+  // === Citire ACS712 la 500ms ===
+  if (millis() - lastSensorRead >= sensorInterval) {
+    lastSensorRead = millis();
 
-  // Media top, bottom, left si right
-  int avgT = (tl + tr) / 2;
-  int avgB = (dl + dr) / 2;
-  int avgL = (tl + dl) / 2;
-  int avgR = (tr + dr) / 2;
+    adcvalue = analogRead(acsPin);
+    voltage = (adcvalue / 1024.0) * 5000.0;
+    current = (voltage - offsetvoltage) / sensitivity;
 
-  Serial.print("TL: "); Serial.print(tl);
-  Serial.print(" | TR: "); Serial.print(tr);
-  Serial.print(" | DL: "); Serial.print(dl);
-  Serial.print(" | DR: "); Serial.println(dr);
+    lcd.setCursor(0, 0);
+    lcd.print("V:");
+    lcd.print(voltage, 0);
+    lcd.print("mV ");
 
-  // Miscare doar daca diferenta este semnificativa
-  if (abs(avgT - avgB) > threshold) {
-    UpDown(avgT, avgB);
+    lcd.setCursor(0, 1);
+    lcd.print("I:");
+    lcd.print(current, 2);
+    lcd.print("A   ");
+
+    Serial.print("Tensiune senzor: ");
+    Serial.print(voltage, 1);
+    Serial.print(" mV | Curent: ");
+    Serial.print(current, 3);
+    Serial.println(" A");
   }
-  if (abs(avgL - avgR) > threshold) {
-    LeftRight(avgL, avgR);
-  }
 
-  delay(100);
+  // === Citire fotorezistori la 100ms ===
+  if (millis() - lastLDRRead >= ldrInterval) {
+    lastLDRRead = millis();
+
+    // Citirile senzorilor
+    int tl = smoothAnalogRead(pinTL);
+    int dl = 60 + smoothAnalogRead(pinDL);
+    int tr = smoothAnalogRead(pinTR);
+    int dr = 20 + smoothAnalogRead(pinDR);
+  
+    // Media top, bottom, left si right
+    int avgT = (tl + tr) / 2;
+    int avgB = (dl + dr) / 2;
+    int avgL = (tl + dl) / 2;
+    int avgR = (tr + dr) / 2;
+  
+    Serial.print("TL: "); Serial.print(tl);
+    Serial.print(" | TR: "); Serial.print(tr);
+    Serial.print(" | DL: "); Serial.print(dl);
+    Serial.print(" | DR: "); Serial.println(dr);
+
+    // Miscare doar daca diferenta este semnificativa
+    if (abs(avgT - avgB) > threshold) {
+      UpDown(avgT, avgB);
+    }
+    if (abs(avgL - avgR) > threshold) {
+      LeftRight(avgL, avgR);
+    }
+  }
 }
 
 void UpDown(int avgT, int avgB) {
