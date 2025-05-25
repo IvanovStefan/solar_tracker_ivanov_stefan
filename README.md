@@ -18,4 +18,4 @@ Un senzor de curent (ACS712) care măsoară curentul generat de panou;
 Un panou LCD cu interfață I2C, care afișează în timp real curentul măsurat.
 Modulul software implementat pe Arduino citește valorile de lumină de la fotorezistori și determină direcția către care panoul trebuie să se orienteze pentru a maximiza captarea luminii. De asemenea, este prelucrată curentului, iar rezultatele sunt afișate pe ecran. Astfel, sistemul asigură o urmărire continuă a sursei de lumină și oferă feedback despre eficiența energetică a orientării curente.
 
-Mai multe detalii despre proiect: [OCW - PM Project]([https://ocw.cs.pub.ro/courses/pm/prj2025/ajipa/stefan.ivanov0604])
+Mai multe detalii despre proiect: [OCW - PM Project](https://ocw.cs.pub.ro/courses/pm/prj2025/ajipa/stefan.ivanov0604)
