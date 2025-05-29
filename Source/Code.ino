@@ -17,7 +17,7 @@ const int pinDR = A5;
 
 // Valori pentru ACS712
 const int acsPin = A0;
-int sensitivity = 100;       // 100 mV/A pentru modulul de 20A
+int sensitivity = 185;       // 185 mV/A pentru modulul de 5A
 int offsetvoltage = 2500;    // offset în mV
 int adcvalue = 0;
 double voltage = 0;
